@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { features } from '../data/data';
 import {
   ArrowRight,
@@ -87,14 +87,65 @@ export function FeatureCard({ feature, onSelect, isSelected }) {
 }
 
 export function Features({ onSelectFeature, onExploreAll }) {
-  const [selectedFeatureId, setSelectedFeatureId] = useState(features[0]?.id || 'f1');
+  const [selectedFeatureId, setSelectedFeatureId] = useState(features[0]?.id || 'project-management');
   const [kanbanTasks, setKanbanTasks] = useState([
     { id: 'k1', title: 'Implement AI Smart Triage', col: 'in-progress' },
-    { id: 'k2', title: 'Configure OAuth 2.0 & SAML', col: 'done' },
+    { id: 'k2', title: 'Configure OAuth 2.0 & SAML SSO', col: 'done' },
     { id: 'k3', title: 'Automate Weekly Standup Summaries', col: 'todo' }
   ]);
+  const [newTaskText, setNewTaskText] = useState('');
   const [timerRunning, setTimerRunning] = useState(false);
-  const [timerSeconds, setTimerSeconds] = useState(1480);
+  const [timerSeconds, setTimerSeconds] = useState(1500); // 25:00 Pomodoro focus session
+  const [aiPromptIndex, setAiPromptIndex] = useState(0);
+  const [copiedAiText, setCopiedAiText] = useState(false);
+
+  const aiPrompts = [
+    {
+      prompt: '"Summarize key takeaways from yesterday\'s product council meeting"',
+      bullets: [
+        'Target Q3 launch set for October 14th with SOC-2 Type II audit completed.',
+        'Allocated 3 engineers to autonomous CI/CD auto-triage workflows.',
+        'Sprint velocity projected to increase +38% across Linear backlogs.'
+      ]
+    },
+    {
+      prompt: '"Generate test plan and edge cases for auth token refresh rotation"',
+      bullets: [
+        'Verified expiration threshold at 15 minutes with grace period.',
+        'Simulated race conditions on concurrent 401 interceptors in web worker.',
+        'Automated regression tests committed to GitHub PR #142 pipeline.'
+      ]
+    },
+    {
+      prompt: '"Draft executive release notes for NOVA AI 2.0 deployment"',
+      bullets: [
+        'Zero-downtime database migration completed in 1.4 seconds.',
+        '100% test coverage verified across 18 microservice endpoints.',
+        'Slack alert dispatched to 142 team stakeholders automatically.'
+      ]
+    }
+  ];
+
+  // Active Focus Timer Countdown
+  useEffect(() => {
+    if (!timerRunning) return;
+    const interval = setInterval(() => {
+      setTimerSeconds((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setTimerRunning(false);
+          try {
+            confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
+          } catch {
+            // fallback
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [timerRunning]);
 
   const selectedFeature = features.find(f => f.id === selectedFeatureId) || features[0];
 
@@ -109,6 +160,25 @@ export function Features({ onSelectFeature, onExploreAll }) {
     );
     if (targetCol === 'done') {
       confetti({ particleCount: 30, spread: 50, origin: { y: 0.7 } });
+    }
+  };
+
+  const handleAddKanbanTask = (e) => {
+    e.preventDefault();
+    if (!newTaskText.trim()) return;
+    setKanbanTasks(prev => [
+      ...prev,
+      { id: `k-${Date.now()}`, title: newTaskText.trim(), col: 'todo' }
+    ]);
+    setNewTaskText('');
+  };
+
+  const handleCopyAi = () => {
+    const textToCopy = aiPrompts[aiPromptIndex].bullets.join('\n• ');
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(textToCopy);
+      setCopiedAiText(true);
+      setTimeout(() => setCopiedAiText(false), 2000);
     }
   };
 
@@ -166,6 +236,20 @@ export function Features({ onSelectFeature, onExploreAll }) {
             {/* 1. Project Management Interactive Kanban */}
             {selectedFeature.id === 'project-management' && (
               <div className="playground-kanban-board">
+                {/* Quick Add Task */}
+                <form onSubmit={handleAddKanbanTask} className="kanban-add-form">
+                  <input
+                    type="text"
+                    placeholder="Add a new task (e.g., 'Deploy vector database cluster')..."
+                    value={newTaskText}
+                    onChange={(e) => setNewTaskText(e.target.value)}
+                    className="kanban-add-input"
+                  />
+                  <button type="submit" className="btn btn-hero-primary btn-sm">
+                    + Add Task
+                  </button>
+                </form>
+
                 <div className="playground-kanban-cols">
                   {['todo', 'in-progress', 'done'].map((col) => (
                     <div key={col} className="kanban-col-lane">
@@ -189,7 +273,7 @@ export function Features({ onSelectFeature, onExploreAll }) {
                                   onClick={() => moveKanbanTask(task.id, col === 'done' ? 'in-progress' : 'todo')}
                                   title="Move backwards"
                                 >
-                                  ←
+                                  ← Back
                                 </button>
                               )}
                               {col !== 'done' && (
@@ -215,17 +299,17 @@ export function Features({ onSelectFeature, onExploreAll }) {
             {selectedFeature.id === 'task-automation' && (
               <div className="playground-automation-view">
                 <div className="automation-recipe-card">
-                  <div className="recipe-badge">ACTIVE RECIPE #1</div>
+                  <div className="recipe-badge">ACTIVE AUTONOMOUS RECIPE #1</div>
                   <div className="recipe-flow-row">
                     <span className="recipe-tag tag-blue">IF: GitHub PR Merged</span>
                     <span className="recipe-arrow">➔</span>
-                    <span className="recipe-tag tag-purple">NOVA AI Agent</span>
+                    <span className="recipe-tag tag-purple">NOVA Neural Agent</span>
                     <span className="recipe-arrow">➔</span>
                     <span className="recipe-tag tag-green">THEN: Close Jira Sprint Ticket & Notify Slack</span>
                   </div>
                   <div className="recipe-status-pill">
                     <span className="pulse-dot-green" />
-                    <span>Triggered 142 times today • 0.3s avg execution</span>
+                    <span>Triggered 142 times today • 0.3s avg latency • Zero false positives</span>
                   </div>
                 </div>
               </div>
@@ -237,13 +321,18 @@ export function Features({ onSelectFeature, onExploreAll }) {
                 <div className="collab-active-avatars">
                   <div className="avatar-chip user-1">
                     <div className="avatar-ring">AR</div>
-                    <span>Alex Rivera (Editing Sprint #14)</span>
-                    <span className="cursor-tag tag-blue">Typing...</span>
+                    <span>Alex Rivera (Editing Sprint #14 Retrospective)</span>
+                    <span className="cursor-tag tag-blue">Live Cursor</span>
                   </div>
                   <div className="avatar-chip user-2">
                     <div className="avatar-ring">SL</div>
-                    <span>Sarah L. (Reviewing PR specs)</span>
-                    <span className="cursor-tag tag-purple">Live Cursor</span>
+                    <span>Sarah L. (Reviewing security token audit)</span>
+                    <span className="cursor-tag tag-purple">Typing...</span>
+                  </div>
+                  <div className="avatar-chip user-3">
+                    <div className="avatar-ring">DW</div>
+                    <span>David W. (Merged PR #892)</span>
+                    <span className="cursor-tag tag-green">Active Now</span>
                   </div>
                 </div>
               </div>
@@ -252,21 +341,39 @@ export function Features({ onSelectFeature, onExploreAll }) {
             {/* 4. AI Assistant Synthesizer */}
             {selectedFeature.id === 'ai-assistant' && (
               <div className="playground-ai-view">
+                <div className="ai-preset-chips">
+                  <span className="ai-preset-title">Select Prompt:</span>
+                  {aiPrompts.map((p, idx) => (
+                    <button
+                      key={idx}
+                      className={`ai-chip-btn ${aiPromptIndex === idx ? 'active' : ''}`}
+                      onClick={() => setAiPromptIndex(idx)}
+                    >
+                      Preset {idx + 1}
+                    </button>
+                  ))}
+                </div>
+
                 <div className="playground-ai-demo-card">
                   <div className="ai-demo-prompt">
-                    <span className="ai-user-chip">User:</span>
-                    <span>"Summarize key takeaways from yesterday's product council meeting"</span>
+                    <span className="ai-user-chip">User Prompt:</span>
+                    <span>{aiPrompts[aiPromptIndex].prompt}</span>
                   </div>
                   <div className="ai-demo-response">
-                    <NovaIcon size={16} glow={false} />
-                    <div>
-                      <strong>NOVA AI Synthesizer:</strong>
-                      <ul>
-                        <li>Target Q3 launch set for October 14th with SOC-2 compliance.</li>
-                        <li>Allocated 3 engineers to mobile performance optimizations.</li>
-                        <li>Automated sprint velocity tracking connected to Linear.</li>
-                      </ul>
+                    <div className="ai-resp-header">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <NovaIcon size={18} glow={false} />
+                        <strong>NOVA AI Synthesizer (Instant Response)</strong>
+                      </div>
+                      <button className="ai-copy-btn" onClick={handleCopyAi}>
+                        {copiedAiText ? '✓ Copied!' : 'Copy Bullets'}
+                      </button>
                     </div>
+                    <ul>
+                      {aiPrompts[aiPromptIndex].bullets.map((b, i) => (
+                        <li key={i}>{b}</li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
               </div>
@@ -278,16 +385,30 @@ export function Features({ onSelectFeature, onExploreAll }) {
                 <div className="time-tracker-widget">
                   <div className="tracker-timer-display">
                     <span className="timer-digits">
-                      {Math.floor(timerSeconds / 60)}:{(timerSeconds % 60).toString().padStart(2, '0')}
+                      {Math.floor(timerSeconds / 60).toString().padStart(2, '0')}:{(timerSeconds % 60).toString().padStart(2, '0')}
                     </span>
-                    <span className="timer-task-name">Sprint #14 - AI Engine Pipeline</span>
+                    <span className="timer-task-name">Focus Session: Sprint #14 - AI Engine Pipeline</span>
+                    <span className="timer-status-sub">
+                      {timerRunning ? '⚡ Timer Active (Focusing)' : '⏸ Timer Paused'}
+                    </span>
                   </div>
-                  <button
-                    className={`btn ${timerRunning ? 'btn-hero-secondary' : 'btn-hero-primary'}`}
-                    onClick={() => setTimerRunning(!timerRunning)}
-                  >
-                    {timerRunning ? 'Pause Timer' : 'Start Focus Session'}
-                  </button>
+                  <div className="tracker-buttons-row">
+                    <button
+                      className={`btn ${timerRunning ? 'btn-hero-secondary' : 'btn-hero-primary'}`}
+                      onClick={() => setTimerRunning(!timerRunning)}
+                    >
+                      {timerRunning ? 'Pause Timer' : 'Start Focus Session'}
+                    </button>
+                    <button
+                      className="btn btn-hero-secondary btn-sm"
+                      onClick={() => {
+                        setTimerRunning(false);
+                        setTimerSeconds(1500);
+                      }}
+                    >
+                      Reset (25:00)
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -299,12 +420,14 @@ export function Features({ onSelectFeature, onExploreAll }) {
                   <div className="security-audit-card">
                     <ShieldCheck size={28} className="text-green-500" />
                     <h4>SOC-2 Type II Certified</h4>
-                    <p>Continuous automated compliance monitoring across all cloud regions.</p>
+                    <p>Continuous automated compliance monitoring across all AWS / GCP cloud regions.</p>
+                    <div className="security-metric-pill">✓ Zero Non-Conformances</div>
                   </div>
                   <div className="security-audit-card">
                     <ShieldCheck size={28} className="text-blue-500" />
                     <h4>End-to-End Encryption</h4>
-                    <p>AES-256 at rest, TLS 1.3 in transit with private KMS keys.</p>
+                    <p>AES-256 at rest, TLS 1.3 in transit with hardware-isolated private KMS keys.</p>
+                    <div className="security-metric-pill">⚡ 0.8ms Handshake Latency</div>
                   </div>
                 </div>
               </div>

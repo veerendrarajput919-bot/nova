@@ -19,7 +19,6 @@ import {
   Volume2,
   Maximize2,
   Sparkles,
-  CheckCircle2,
   ArrowRight,
   ArrowUp,
   Mail,
@@ -28,10 +27,6 @@ import {
   Search,
   Sun,
   Moon,
-  Zap,
-  Calculator,
-  Workflow,
-  HelpCircle,
   Copy,
   CreditCard
 } from 'lucide-react';
@@ -651,9 +646,10 @@ function CommandPalette({
     item.category.toLowerCase().includes(query.toLowerCase())
   );
 
-  useEffect(() => {
+  const handleQueryChange = (val) => {
+    setQuery(val);
     setSelectedIndex(0);
-  }, [query]);
+  };
 
   useEffect(() => {
     if (isOpen && inputRef.current) {
@@ -696,10 +692,10 @@ function CommandPalette({
             className="cmd-search-input"
             placeholder="Search commands, navigate or trigger actions..."
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => handleQueryChange(e.target.value)}
           />
           {query && (
-            <button className="cmd-clear-btn" onClick={() => setQuery('')}>
+            <button className="cmd-clear-btn" onClick={() => handleQueryChange('')}>
               <X size={14} />
             </button>
           )}

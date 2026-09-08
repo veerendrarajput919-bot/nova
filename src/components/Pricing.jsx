@@ -13,8 +13,16 @@ import {
 import { NovaIcon } from './Navbar';
 import confetti from 'canvas-confetti';
 
-export function PricingCard({ plan, isAnnual, onSelectPlan }) {
-  const price = isAnnual ? plan.annualPrice : plan.monthlyPrice;
+const CURRENCIES = {
+  USD: { symbol: '$', rate: 1.0, code: 'USD' },
+  EUR: { symbol: '€', rate: 0.92, code: 'EUR' },
+  GBP: { symbol: '£', rate: 0.79, code: 'GBP' },
+};
+
+export function PricingCard({ plan, isAnnual, currency = 'USD', onSelectPlan }) {
+  const curr = CURRENCIES[currency] || CURRENCIES.USD;
+  const basePrice = isAnnual ? plan.annualPrice : plan.monthlyPrice;
+  const convertedPrice = plan.id === 'starter' ? 0 : Math.round(basePrice * curr.rate);
 
   return (
     <div className={`pricing-card-clean ${plan.popular ? 'pricing-card-clean-popular' : ''}`}>
@@ -29,9 +37,9 @@ export function PricingCard({ plan, isAnnual, onSelectPlan }) {
         <p className="plan-clean-subtitle">{plan.subtitle}</p>
 
         <div className="plan-clean-price-box">
-          <span className="price-dollar">$</span>
-          <span className="price-val">{price}</span>
-          <span className="price-sub">/month</span>
+          <span className="price-dollar">{curr.symbol}</span>
+          <span className="price-val">{convertedPrice}</span>
+          <span className="price-sub">/user/mo</span>
         </div>
 
         <button
@@ -261,6 +269,7 @@ export function RoiCalculator({ onGetStarted }) {
 
 export function Pricing({ onSelectPlan }) {
   const [isAnnual, setIsAnnual] = useState(true);
+  const [currency, setCurrency] = useState('USD');
   const [showComparison, setShowComparison] = useState(false);
 
   const handleToggleAnnual = (val) => {
@@ -310,20 +319,36 @@ export function Pricing({ onSelectPlan }) {
             </p>
           </div>
 
-          {/* Monthly / Annual Pill Toggle */}
-          <div className="pricing-segment-switch">
-            <button
-              className={`segment-btn ${!isAnnual ? 'active' : ''}`}
-              onClick={() => handleToggleAnnual(false)}
-            >
-              Monthly
-            </button>
-            <button
-              className={`segment-btn ${isAnnual ? 'active' : ''}`}
-              onClick={() => handleToggleAnnual(true)}
-            >
-              Annual <span className="save-badge-inline">Save 20% 🎉</span>
-            </button>
+          {/* Controls: Currency + Monthly/Annual Toggle */}
+          <div className="pricing-controls-wrapper">
+            {/* Currency Selector */}
+            <div className="pricing-currency-pills">
+              {['USD', 'EUR', 'GBP'].map((code) => (
+                <button
+                  key={code}
+                  className={`currency-pill-btn ${currency === code ? 'active' : ''}`}
+                  onClick={() => setCurrency(code)}
+                >
+                  {code} ({CURRENCIES[code].symbol})
+                </button>
+              ))}
+            </div>
+
+            {/* Monthly / Annual Pill Toggle */}
+            <div className="pricing-segment-switch">
+              <button
+                className={`segment-btn ${!isAnnual ? 'active' : ''}`}
+                onClick={() => handleToggleAnnual(false)}
+              >
+                Monthly
+              </button>
+              <button
+                className={`segment-btn ${isAnnual ? 'active' : ''}`}
+                onClick={() => handleToggleAnnual(true)}
+              >
+                Annual <span className="save-badge-inline">Save 20% 🎉</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -334,6 +359,7 @@ export function Pricing({ onSelectPlan }) {
               key={plan.id}
               plan={plan}
               isAnnual={isAnnual}
+              currency={currency}
               onSelectPlan={onSelectPlan}
             />
           ))}

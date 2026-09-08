@@ -66,18 +66,45 @@ export function Hero({ onOpenDemo, onOpenAuth }) {
             </div>
           </div>
 
-          {/* Right Column: Hero Dashboard Mockup Image */}
+          {/* Right Column: Hero Dashboard Mockup Image with Floating Badges */}
           <div className="hero-visual">
             <div
               className="hero-image-card-wrapper"
               onClick={onOpenDemo}
               title="Click to watch interactive demo"
             >
+              <div className="hero-visual-glow-ring" />
               <img
                 src="/images/hero-dashboard.webp"
                 alt="NOVA AI Productivity Dashboard and Mobile App Mockup"
                 className="hero-mockup-img"
               />
+
+              {/* Floating Live Indicator Badge Top Right */}
+              <div className="hero-floating-badge badge-top-right">
+                <span className="live-pulse-dot" />
+                <div className="badge-text-group">
+                  <span className="badge-title">AI Engine 2.0</span>
+                  <span className="badge-sub">Auto-Triage Active (2.1s)</span>
+                </div>
+              </div>
+
+              {/* Floating Velocity Badge Bottom Left */}
+              <div className="hero-floating-badge badge-bottom-left">
+                <div className="badge-icon-fire">🚀</div>
+                <div className="badge-text-group">
+                  <span className="badge-title">+42% Sprint Velocity</span>
+                  <span className="badge-sub">Verified by 10k+ teams</span>
+                </div>
+              </div>
+
+              {/* Play demo glass pill overlay */}
+              <div className="hero-play-glass-pill">
+                <div className="play-glass-circle">
+                  <Play size={13} fill="#fff" />
+                </div>
+                <span>Click to Tour Interactive Demo</span>
+              </div>
             </div>
           </div>
         </div>
