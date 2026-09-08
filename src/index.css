@@ -429,7 +429,7 @@ img {
   margin-top: auto;
 }
 
-@media (min-width: 993px) {
+@media (min-width: 1101px) {
   .mobile-nav-drawer,
   .mobile-nav-backdrop {
     display: none !important;
