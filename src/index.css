@@ -242,6 +242,7 @@ img {
   gap: 10px;
   text-decoration: none;
   flex: 0 0 auto;
+  margin-right: 14px;
 }
 
 .nova-brand-lockup {
@@ -291,7 +292,7 @@ img {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(16px, 2vw, 32px);
+  gap: clamp(12px, 1.4vw, 24px);
   flex: 1 1 auto;
   min-width: 0;
 }
@@ -301,6 +302,7 @@ img {
   font-weight: 600;
   color: var(--text-muted);
   white-space: nowrap;
+  flex: 0 0 auto;
   transition: color 0.2s ease;
 }
 
@@ -311,7 +313,7 @@ img {
 .navbar-actions-clean {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   flex: 0 0 auto;
 }
 
